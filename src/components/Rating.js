@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Rating from '@mui/material/Rating';
 import StarIcon from '@mui/icons-material/Star';
 
-export default function TextRating({value,count}) {
+export default function TextRating({value}) {
 
   return (
     <Box
@@ -17,10 +17,10 @@ export default function TextRating({value,count}) {
         name="text-feedback"
         value={value}
         readOnly
-        precision={0.5}
-        emptyIcon={<StarIcon style={{ opacity: 0.55 ,width: "12px"}} fontSize="12" />}
+        precision={0.1}
+        emptyIcon={<StarIcon style={{ opacity: 0.55 ,width: "26px"}} fontSize="8" />}
       />
-      <Box sx={{ ml: 1 ,mt:0.5, fontWeight: "600"}}>({count})</Box> 
+      {/* <Box sx={{ ml: 1 ,mt:0.5, fontWeight: "600"}}>({count})</Box>  */}
     </Box>
   );
 }

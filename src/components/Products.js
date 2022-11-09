@@ -4,33 +4,38 @@ import axios from 'axios'
 import { Box, Container, Pagination } from '@mui/material';
 import SingleProduct from './SingleProduct';
 import Grid from '@mui/material/Grid';
-import Link from '@mui/material/Link';
+import Skeleton from '@mui/material/Skeleton';
 
 
-function Products({searchTerm}) {
-    const [products, setProducts] = useState([])
-    const [currentPage, setCurrentPage]= useState(1)
-    const[postPerPage,setPostPerPage]= useState(6)
+function Products({searchTerm,setProducts,products}) {
+    const [currentPage, setCurrentPage]= useState(0)
+    const[postPerPage,setPostPerPage]= useState(30)
+    const [loading, setLoading]= useState(false)
     const [seachProducts, setSearchProducts] = useState([])
     const dispatch = useDispatch();
     const handleSubmit=(e,p)=>{
-        setCurrentPage(p)
+        setCurrentPage(p-1)
     }
     useEffect(() => {
         const getAllProducts = async () => {
             try {
-                const res = await axios(`https://fakestoreapi.com/products/`);
-                setProducts(res.data);
+                setLoading(true)
+                const res = await axios.get(`https://dummyjson.com/products?limit=9&skip=${currentPage*9}`);
+                setLoading(false)
+                setProducts(res.data.products);
+                
                 localStorage.setItem('products', JSON.stringify(res.data));
-                // localStorage.setItem("cart", JSON.stringify(res.data));
+                
                 dispatch({ type: "INITAL", payload: res.data })
             } catch (err) {
+                setLoading(false)
                 console.log(err);
             }
         };
         getAllProducts();
-        // eslint-disable-next-line
-    }, []);
+       //eslint-disable-next-line
+    }, [currentPage]);
+    console.log(products)
     useMemo(() => {
         if(searchTerm !== ""){
             const newSearchProducts = products.filter((product)=>{
@@ -38,22 +43,15 @@ function Products({searchTerm}) {
             }) 
             setSearchProducts(newSearchProducts)
             console.log(seachProducts)
-            // setSearchProducts(newSearchProducts)
+            
             }
     }, 
     [searchTerm])
-    
-        // else {
-        //     setSearchProducts(products)
-        // }
 
     const indexOfLastPost= currentPage * postPerPage
-    const indexOfFirstPost = indexOfLastPost - postPerPage
-
-    const currentProducts = searchTerm.length > 1 ? seachProducts : products.slice(indexOfFirstPost,indexOfLastPost)
+    const currentProducts = searchTerm.length > 1 ? seachProducts : products
     console.log(products)
     const pages = searchTerm.length > 1 ? seachProducts : products
-    const pageCount  = Math.ceil(pages.length /postPerPage)
     const { cart } = useSelector((cart) => ({ ...cart }));
     console.log(cart)
     return (
@@ -62,13 +60,14 @@ function Products({searchTerm}) {
                 <Grid container spacing={3}>
                     {currentProducts.map((prod) => (
                         <Grid item xs={4} mb={"22px"}>
-                             <Link href={`/product/${prod.id}`} underline="none"><SingleProduct prod={prod} key={prod.id} /></Link>
+                                <SingleProduct prod={prod} key={prod.id} setProducts={setProducts} products={products}/>     
                         </Grid>
 
                     ))}
 
                 </Grid>
-                <Pagination count={pageCount} color="primary" onChange={handleSubmit}/>
+                {loading &&  <Skeleton variant="rectangular" width={400} height={118} />}
+                <Pagination count={10} color="primary" onChange={handleSubmit}/>
             </Box>
         </Container>
     )
